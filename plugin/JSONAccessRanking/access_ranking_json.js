@@ -24,11 +24,14 @@ $(document).ready(function(){
 });
 
 /*--
-HTML
-<div class="accessranking"></div>
+HTML: blow the code into widget
+<div class="widget-ranking-entries widget-archives widget">
+    <div class="widget-content accessranking">
+    </div>
+</div>
 
 
-CSS
+CSS: customize your favorite design
 ul.rk_list {
 	list-style-image: none;
 	list-style-position: outside;
@@ -38,6 +41,7 @@ li.rk_item {
 	margin: 0;
 	padding: 0; }
 
-
+footerJS: below the code into after </body>
+<script type="text/javascript" src="<$MTBlogURL$>js/accessranking.js"></script>
 
 --*/
