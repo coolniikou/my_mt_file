@@ -1,0 +1,213 @@
+# Asset Exif, a plugin for Movable Type
+# Author: cool_ni_ikou, cool_ni_ikou@live.jp
+# Copyright (C) 2009 cool_ni_ikou
+# This file is licensed under the Artistic License, or the same
+# terms as Perl itself.
+
+package MT::Plugin::AssetExif;
+use strict;
+use base qw(MT::Plugin);
+use MT;
+use MT::Template::Context;
+use lib $ENV{MT_HOME} ? "$ENV{MT_HOME}/plugins/AssetExif/extlib" : '/plugins/AssetExif/extlib';
+use Image::ExifTool;
+use JSON;
+
+our $VERSION = '0.1';
+
+my $plugin = new MT::Plugin::AssetExif({
+    id => 'Asset Exif',
+    key => 'asset_exif',
+    name => '<MT_TRANS phrase="as_NAME">',
+    version => $VERSION,
+    description => '<MT_TRANS phrase="as_DESCRIPTION">',
+    doc_link => 'http://weblibrary.s224.xrea.com/mt4plugins/assetexif/',
+    author_name => '<MT_TRANS phrase="as_AUTHOR_NAME">',
+    author_link => 'http://weblibrary.s224.xrea.com/',
+    blog_config_template => 'exiftag_config.tmpl',
+    l10n_class => 'AssetExif::L10N',
+    settings => new MT::PluginSettings([
+		['set_display', { Default => 0, Scope => 'blog' }],
+		['exif_set_mode', { Default => 0, Scope => 'blog' }],
+		['DateTimeOriginal', { Default => 0, Scope => 'blog' }],
+		['ShutterSpeed', { Default => 0, Scope => 'blog' }],
+		['Aperture', { Default => 0, Scope => 'blog' }],
+		['ISO', { Default => 0, Scope => 'blog' }],
+		['FocalLength', { Default => 0, Scope => 'blog' }],
+		['Flash', { Default => 0, Scope => 'blog' }],
+		['AFAreaMode', { Default => 0, Scope => 'blog' }],
+		['MeteringMode', { Default => 0, Scope => 'blog' }],
+		['ExposureMode', { Default => 0, Scope => 'blog' }],
+		['ExposureCompensation', { Default => 0, Scope => 'blog' }],
+		['Focus Mode', { Default => 0, Scope => 'blog' }],
+		['Make', { Default => 0, Scope => 'blog' }],
+		['Model', { Default => 0, Scope => 'blog' }],
+		['LensID', { Default => 0, Scope => 'blog' }],
+		['WhiteBalance', { Default => 0, Scope => 'blog' }],
+		['Lens', { Default => 0, Scope => 'blog' }],
+		['Quality', { Default => 0, Scope => 'blog' }],
+		['ShootingMode', { Default => 0, Scope => 'blog' }],
+		['Contrast', { Default => 0, Scope => 'blog' }],
+		['Saturation', { Default => 0, Scope => 'blog' }],
+		['FileSize', { Default => 0, Scope => 'blog' }],
+		['ImageSize', { Default => 0, Scope => 'blog' }],
+		['FileName', { Default => 0, Scope => 'blog' }],
+		['WhiteBalance', { Default => 0, Scope => 'blog' }],
+    ]),
+});
+MT->add_plugin($plugin);
+
+sub init_registry{
+    my $plugin = shift;
+    $plugin->registry({
+        tags => {
+            function => {
+                'AssetExif' => \&_hdlr_assetexif,
+            },
+        },
+    });
+}
+
+my %trans = ( 
+'FileName' => 'ファイル名',
+'CameraModelName' => '画像入力機器モデル',
+'DateTimeOriginal' => 'オリジナルデータ作成日時',
+'ShootingMode' => '撮影モード',
+'ShutterSpeed' => '露出時間',
+'ExposureTime' => '露出時間',
+'AFAreaMode' => 'AFエリアモード',
+'Aperture' => '絞り値',
+'MeteringMode' => '測光モード',
+'ExposureMode' => '露光モード',
+'ExposureCompensation' => '露出補正値',
+'ISO' => 'ISO',
+'Lens' => 'レンズ',
+'LensID' => 'レンズ機種名',
+'FocalLength' => 'レンズ焦点距離',
+'ImageSize' => 'イメージサイズ',
+'Quality' => '品質',
+'Flash' => 'フラッシュ',
+'WhiteBalance' => 'ホワイトバランス',
+'Focus Mode' => 'フォーカスモード',
+'Contrast' => 'コントラスト',
+'Sharpness' => 'シャープネス',
+'Saturation' => '彩度',
+'FileSize' => 'ファイルサイズ',
+'MakerNote' => 'カメラの内部情報等',
+'Make' => '機種名',
+'Model' => 'モデル名',
+'FNumber' => '絞り値',
+'ShutterSpeed' => 'シャッタースピード',
+);
+
+
+sub _hdlr_assetexif {
+	my ($ctx, $args) = @_;
+	my $type = $args->{type};
+	if ($type) {
+		 if( $type ne 'xml' && $type ne 'json' ) {
+				die 'Invalid parametar. You should be checked type\'s parameter that template tag arguments.';
+		};
+	};
+	my $scope_id =  $ctx->stash('blog_id');
+	my $asset = $ctx->stash('asset');
+	my $file_path = $asset->file_path;
+	my $keys = $plugin->get_config_hash('blog:'.$scope_id);
+ 	my @tags = get_settings($keys);
+	my $exif_tool = new Image::ExifTool;
+		$exif_tool->Options( Lang => 'ja', Duplicates => 0 );
+	my $exif_info = $exif_tool->ImageInfo( $file_path, @tags );
+	my $set_disp = $keys->{set_display};
+	my @info = sort keys %$exif_info;
+	my $out;
+	if ( $type eq 'xml' ) {
+			foreach my $key ( @info) {
+				$out .= '<exif:' . $key . '>' . $$exif_info{$key} . '</exif:' . $key . '>';
+			}
+	} elsif ( $type eq 'json' ) {
+			$out .= objToJson($exif_info);
+	} else {
+			if ( $set_disp == '1'){
+					foreach my $key ( @info ){
+							$out .= "<li><strong>" . $trans{$key} . "</strong> : " . $$exif_info{$key} . "</li>\n";
+					}
+			} elsif ( $set_disp == '2' ){
+					foreach my $key ( @info ){
+							$out .= "<li><strong>" . $key . "</strong> (" . $trans{$key} . ") : " . $$exif_info{$key} . "</li>\n";
+					}
+			} else {
+					foreach my $key ( @info ){
+							$out .= "<li><strong>" . $key . "</strong> : " . $$exif_info{$key} . "</li>\n";
+					}
+			}
+	}
+	return $out;
+}
+
+sub get_settings {
+	my ($keys) = @_;
+	my @tags;
+	if ( $keys->{exif_set_mode} == '2' ){
+#		@tags = grep { $keys->{$_} == '1' } keys %$keys;
+	push(@tags, 'DateTimeOriginal')
+		if defined ($keys->{'DateTimeOriginal'});
+	push(@tags, 'ShutterSpeed')
+		if defined ($keys->{'ShutterSpeed'});
+	push(@tags, 'ISO')
+		if defined ($keys->{'ISO'});
+	push(@tags, 'Aperture')
+		if defined ($keys->{'Aperture'});
+	push(@tags, 'FocalLength')
+		if defined ($keys->{'FocalLength'});
+	push(@tags, 'AFAreaMode')
+		if defined ($keys->{'AFAreaMode'});
+	push(@tags, 'MeteringMode')
+		if defined ($keys->{'MeteringMode'});
+	push(@tags, 'ExposureMode')
+		if defined ($keys->{'ExposureMode'});
+	push(@tags, 'Flash')
+		if defined ($keys->{'Flash'});
+	push(@tags, 'ExposureCompensation')
+		if defined ($keys->{'ExposureCompensation'});
+	push(@tags, 'Focus Mode')
+		if defined ($keys->{'Focus Mode'});
+	push(@tags, 'Make')
+		if defined ($keys->{'Make'});
+	push(@tags, 'Model')
+		if defined ($keys->{'Model'});
+	push(@tags, 'LensID')
+		if defined ($keys->{'LensID'});
+	push(@tags, 'WhiteBalance')
+		if defined ($keys->{'WhiteBalance'});
+	push(@tags, 'Lens')
+		if defined ($keys->{'Lens'});
+	push(@tags, 'Quality')
+		if defined ($keys->{'Quality'});
+	push(@tags, 'ShootingMode')
+		if defined ($keys->{'ShootingMode'});
+	push(@tags, 'Contrast')
+		if defined ($keys->{'Contrast'});
+	push(@tags, 'Saturation')
+		if defined ($keys->{'Saturation'});
+	push(@tags, 'FileSize')
+		if defined ($keys->{'FileSize'});
+	push(@tags, 'ImageSize')
+		if defined ($keys->{'ImageSize'});
+	push(@tags, 'FileName')
+		if defined ($keys->{'FileName'});
+	} else {
+		@tags = keys %trans;
+	}
+	@tags;
+}
+
+1;
+
+#############################################################
+=head2 AssetExif
+
+This tag outputs the contents of the Exif-Data extracted from 
+within the image files.
+
+You should be 
+=cut 

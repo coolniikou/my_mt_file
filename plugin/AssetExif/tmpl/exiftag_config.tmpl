@@ -1,0 +1,53 @@
+<p>
+<MT_TRANS phrase="as_SET_DES">
+</p>
+	<h4><MT_TRANS phrase="as_SettingTitle"></h4>
+<ul>
+<mtapp:setting
+	id="exif_set_display"
+	label="<MT_TRANS phrase="as_SetDisplay">">
+<li><input type="radio" name="set_display" id="set_display" value="0" <TMPL_UNLESS NAME=SET_DISPLAY>checked="checked"</TMPL_UNLESS> /><MT_TRANS phrase="as_EnOnly"></li>
+<li><input type="radio" name="set_display" id="set_display" value="1" <TMPL_IF NAME=SET_DISPLAY_1>checked="checked"</TMPL_IF> /><MT_TRANS phrase="as_NativeOnly"></li>
+<li><input type="radio" name="set_display" id="set_display" value="2" <TMPL_IF NAME=SET_DISPLAY_2>checked="checked"</TMPL_IF> /><MT_TRANS phrase="as_EnAndNative"></li>
+</mtapp:setting>
+</ul>
+<ul>
+<mtapp:setting
+	id="exif_set_mode"
+	label="<MT_TRANS phrase="as_SelectMode">">
+<li><input type="radio" name="exif_set_mode" id="exif_set_mode" value="0" <TMPL_UNLESS NAME=EXIF_SET_MODE>checked="checked"</TMPL_UNLESS> onclick="toggleSubPrefs(this)" /><MT_TRANS phrase="as_SetMode_0"></li>
+<li><input type="radio" name="exif_set_mode" id="exif_set_mode" value="2" <TMPL_IF NAME=EXIF_SET_MODE_2>checked="checked"</TMPL_IF> onclick="toggleSubPrefs(this);toggleAdvancedPrefs(event,this)" /> <MT_TRANS phrase="as_SetMode_2"></li>
+</mtapp:setting>
+</ul>
+<div id="exif_set_mode-prefs" class="<TMPL_UNLESS NAME=EXIF_SET_MODE_2>hidden</TMPL_UNLESS>">
+		<ul>
+<mtapp:setting
+	id="settings_key"
+	label="<MT_TRANS phrase="as_Settings_Key">">
+			<li><input type="checkbox" name="AFAreaMode" id="AFAreaMode" value="1"<mt:if name="AFAreaMode"> checked="checked"</mt:if> /><MT_TRANS phrase="as_AFAreaMode"></li>
+			<li><input type="checkbox" name="Aperture" id="Aperture" value="1"<mt:if name="Aperture"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Aperture"></li>
+			<li><input type="checkbox" name="Contrast" id="Contrast" value="1"<mt:if name="Contrast"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Contrast"></li>
+			<li><input type="checkbox" name="DateTimeOriginal" id="DateTimeOriginal" value="1"<mt:if name="DateTimeOriginal"> checked="checked"</mt:if> /><MT_TRANS phrase="as_DateTimeOriginal"></li>
+			<li><input type="checkbox" name="ExposureCompensation" id="ExposureCompensation" value="1"<mt:if name="ExposureCompensation"> checked="checked"</mt:if> /><MT_TRANS phrase="as_ExposureCompensation"></li>
+			<li><input type="checkbox" name="ExposureMode" id="ExposureMode" value="1"<mt:if name="ExposureMode"> checked="checked"</mt:if> /><MT_TRANS phrase="as_ExposureMode"></li>
+			<li><input type="checkbox" name="FileName" id="FileName" value="1"<mt:if name="FileName"> checked="checked"</mt:if> /><MT_TRANS phrase="as_FileName"></li>
+			<li><input type="checkbox" name="FileSize" id="FileSize" value="1"<mt:if name="FileSize"> checked="checked"</mt:if> /><MT_TRANS phrase="as_FileSize"></li>
+			<li><input type="checkbox" name="Flash" id="Flash" value="1"<mt:if name="Flash"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Flash"></li>
+			<li><input type="checkbox" name="FocalLength" id="FocalLength" value="1"<mt:if name="FocalLength"> checked="checked"</mt:if> /><MT_TRANS phrase="as_FocalLength"></li>
+			<li><input type="checkbox" name="Focus Mode" id="Focus Mode" value="1"<mt:if name="Focus Mode"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Focus_Mode"></li>
+			<li><input type="checkbox" name="ISO" id="ISO" value="1"<mt:if name="ISO"> checked="checked"</mt:if> /><MT_TRANS phrase="as_ISO"></li>
+			<li><input type="checkbox" name="ImageSize" id="ImageSize" value="1"<mt:if name="ImageSize"> checked="checked"</mt:if> /><MT_TRANS phrase="as_ImageSize"></li>
+			<li><input type="checkbox" name="Lens" id="Lens" value="1"<mt:if name="Lens"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Lens"></li>
+			<li><input type="checkbox" name="LensID" id="LensID" value="1"<mt:if name="LensID"> checked="checked"</mt:if> /><MT_TRANS phrase="as_LensID"></li>
+			<li><input type="checkbox" name="Make" id="Make" value="1"<mt:if name="Make"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Make"></li>
+			<li><input type="checkbox" name="MeteringMode" id="MeteringMode" value="1"<mt:if name="MeteringMode"> checked="checked"</mt:if> /><MT_TRANS phrase="as_MeteringMode"></li>
+			<li><input type="checkbox" name="Model" id="Model" value="1"<mt:if name="Model"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Model"></li>
+			<li><input type="checkbox" name="Quality" id="Quality" value="1"<mt:if name="Quality"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Quality"></li>
+			<li><input type="checkbox" name="Saturation" id="Saturation" value="1"<mt:if name="Saturation"> checked="checked"</mt:if> /><MT_TRANS phrase="as_Saturation"></li>
+			<li><input type="checkbox" name="ShootingMode" id="ShootingMode" value="1"<mt:if name="ShootingMode"> checked="checked"</mt:if> /><MT_TRANS phrase="as_ShootingMode"></li>
+			<li><input type="checkbox" name="ShutterSpeed" id="ShutterSpeed" value="1"<mt:if name="ShutterSpeed"> checked="checked"</mt:if> /><MT_TRANS phrase="as_ShutterSpeed"></li>
+			<li><input type="checkbox" name="WhiteBalance" id="ShutterSpeed" value="1"<mt:if name="WhiteBalance"> checked="checked"</mt:if> /><MT_TRANS phrase="as_WhiteBalance"></li>
+</mtapp:setting>
+		</ul>
+	</div>
+

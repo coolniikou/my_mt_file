@@ -1,0 +1,52 @@
+package AssetExif::L10N::en_us;
+
+use strict;
+use base 'AssetExif::L10N';
+use vars qw( %Lexicon );
+%Lexicon = (
+	'as_NAME' => 'Asset Exif, a plugin for Movable Type',
+	'as_AUTHOR_NAME' => 'cool_ni_ikou',
+	'as_DESCRIPTION' => 'Asset Exif makes it easy to show Exif-Data extracted from within the image files.',
+	'as_AssetExif' => 'Asset Exif',
+	'as_SET_DES' => 'require initial setup (select display pattern and display items extracted from within images files). ',
+	'as_EnAndNative' => 'display En & Native　ex. Aperture (Native):5.6',
+	'as_EnOnly' => 'display En only  ex. Aperture:5.6',
+	'as_NativeOnly' => 'display Native only 　ex. Native :5.6',
+	'as_Saturation' => 'Saturation',
+	'as_SelectMode' => 'Select Mode',
+	'as_SetDisplay' => 'Set Display Pattern',
+	'as_SetMode_0' => 'show all the Exif-information extracted from within image files.',
+	'as_SetMode_2' => 'you make free to selected and set displayed the exif-information.',
+	'as_SettingTitle' => 'ExifTag Display Initial SetUp',
+	'as_Settings_Key' => 'Select items',
+	'as_AFAreaMode' => 'AFAreaMode',
+	'as_Aperture' => 'Aperture',
+	'as_CameraModelName' => 'CameraModelName',
+	'as_Contrast' => 'Contrast',
+	'as_DateTimeOriginal' => 'DateTimeOriginal',
+	'as_ExposureCompensation' => 'ExposureCompensation',
+	'as_ExposureMode' => 'ExposureMode',
+	'as_ExposureTime' => 'ExposureTime',
+	'as_FNumber' => 'FNumber',
+	'as_FileName' => 'FileName',
+	'as_FileSize' => 'FileSize',
+	'as_Flash' => 'Flash',
+	'as_FocalLength' => 'FocalLength',
+	'as_Focus_Mode' => 'Focus Mode',
+	'as_GPSPosition' => 'GPSPosition',
+	'as_ISO' => 'ISO',
+	'as_ImageSize' => 'ImageSize',
+	'as_Lens' => 'Lens',
+	'as_LensID' => 'LensID',
+	'as_Make' => 'Make',
+	'as_MakerNote' => 'MakerNote',
+	'as_MeteringMode' => 'MeteringMode',
+	'as_Model' => 'Model',
+	'as_Quality' => 'Quality',
+	'as_Sharpness' => 'Sharpness',
+	'as_ShootingMode' => 'ShootingMode',
+	'as_ShutterSpeed' => 'ShutterSpeed',
+	'as_WhiteBalance' => 'WhiteBalance',
+);
+
+1;
