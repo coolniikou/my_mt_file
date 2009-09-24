@@ -3,8 +3,8 @@
 $(document).ready(function(){
 	var uri = 'http://domain/path/to/accessranking.json';
 	var base_uri = 'http://domain (no slash)';
-	var	list = '<h4>Weekly アクセスランキング</h4>';
-		list += '<ul class="rk_list">';
+	var list = '<h4>Weekly アクセスランキング</h4>';
+	    list += '<ul class="rk_list">';
 	
 	$.getJSON(uri, function(data){
 		var a = data;
@@ -12,7 +12,7 @@ $(document).ready(function(){
 		for (i=0; i<a.length; i++) {
 			var title = a[i]['dxp:dimension']['ga:pageTitle'].value;
 			    title = title.substr(0,40);
-				title += '...';
+		            title += '...';
 			var url = a[i]['dxp:dimension']['ga:pagePath'].value;
 			list += '<li class="rk_item">'+c+' : '+'<a href="'+url+'">'+title+'</a></li>';
 			c++;
