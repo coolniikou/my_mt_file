@@ -6,7 +6,6 @@ use MT::Util qw( start_end_day epoch2ts format_ts );
 use XML::Simple;
 use JSON;
 
-
 our $VERSION = '1.0';
 
 my $plugin; $plugin = new MT::Plugin::JSONAccessRanking({
@@ -50,6 +49,7 @@ sub _hdlr_analyticjson {
 	my ($ctx, $args) = @_;
 	my $blog =  $ctx->stash('blog');
 	my $blog_id =  $ctx->stash('blog_id');
+	my $span = $args->{span};
 	my $user = $plugin->get_config_value('analytics_username', "blog:" . $blog_id);
 	my $pass = $plugin->get_config_value('analytics_password', "blog:" . $blog_id);
 	my $profileid = $plugin->get_config_value('analytics_profile_id', "blog:" . $blog_id);
@@ -63,12 +63,16 @@ sub _hdlr_analyticjson {
 	   $week_ago = format_ts( '%Y-%m-%d', $week_ago, $blog );
 	my $month_ago = start_end_day( epoch2ts( $blog, $now - ( 60 * 60 * 24 * 30 ) ) );
 	   $month_ago = format_ts( '%Y-%m-%d', $month_ago, $blog );
-       
-	my $week_data = &get_data($token, $profileid, $week_ago, $today, $maxresult);
-	my $month_data = &get_data($token, $profileid, $month_ago, $today, $maxresult);
-       #$week_data = decode('utf8',$week_data);
+	my $data;	
+	if ( $span eq 'month' ){
+		$data = &get_data($token, $profileid, $month_ago, $today, $maxresult);
+	doLog($data);
+	} else { 
+		$data = &get_data($token, $profileid, $week_ago, $today, $maxresult);
+	doLog($data);
+       	}
 	my $parser = XML::Simple->new(Forcearray => 1);
-	my $xml = $parser->XMLin($week_data);
+	my $xml = $parser->XMLin($data);
 	my $json = to_json($xml->{entry});
 	return $json;
 }
