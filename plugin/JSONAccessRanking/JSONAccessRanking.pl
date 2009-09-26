@@ -54,7 +54,7 @@ sub _hdlr_analyticjson {
 	my $pass = $plugin->get_config_value('analytics_password', "blog:" . $blog_id);
 	my $profileid = $plugin->get_config_value('analytics_profile_id', "blog:" . $blog_id);
 	my $maxresult = $plugin->get_config_value('analytics_maxresult', "blog:" . $blog_id);
-	my $token = &get_token($user, $pass);
+	my $token = get_token($user, $pass);
 	
 	my $now = time;
 	my $today = start_end_day( epoch2ts( $blog, $now ) );
@@ -65,10 +65,10 @@ sub _hdlr_analyticjson {
 	   $month_ago = format_ts( '%Y-%m-%d', $month_ago, $blog );
 	my $data;	
 	if ( $span eq 'month' ){
-		$data = &get_data($token, $profileid, $month_ago, $today, $maxresult);
+		$data = get_data($token, $profileid, $month_ago, $today, $maxresult);
 	doLog($data);
 	} else { 
-		$data = &get_data($token, $profileid, $week_ago, $today, $maxresult);
+		$data = get_data($token, $profileid, $week_ago, $today, $maxresult);
 	doLog($data);
        	}
 	my $parser = XML::Simple->new(Forcearray => 1);
