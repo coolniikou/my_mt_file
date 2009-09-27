@@ -1,0 +1,36 @@
+<p>
+Tiwtterユーザーネーム、ブログID、投稿者ID、カテゴリーID、投稿状態（未公開[1]もしくは公開[2]）、エントリータイトルの設定をしてください。
+</p>
+<ul>
+<mtapp:setting
+    id="twitter_username"
+    label="Twitter_Username">
+    <input type="text" name="twitter_username" id="twitter_username" value="<mt:var name="twitter_username" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="blogid"
+    label="blogid">
+    <input type="text" name="blogid" id="blogid" value="<mt:var name="blogid" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="author_id"
+    label="author_id">
+    <input type="text" name="author_id" id="author_id" value="<mt:var name="author_id" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="category_id"
+    label="categoryID">
+    <input type="text" name="category_id" id="category_id" value="<mt:var name="category_id" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="status"
+    label="公開ステータス">
+    <input type="text" name="status" id="status" value="<mt:var name="status" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="title"
+    label="エントリータイトル">
+    <input type="text" name="title" id="title" value="<mt:var name="title" escape="html">" />
+</mtapp:setting>
+</ul>
+
