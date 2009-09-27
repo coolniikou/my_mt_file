@@ -6,7 +6,7 @@ use MT::Blog;
 use MT::Entry;
 use MT::Log;
 use MT::I18N;
-use MT::Util qw( start_end_day epoch2ts format_ts encode_xml);
+use MT::Util qw( start_end_day epoch2ts format_ts );
 use MT::Placement;
 use MT::WeblogPublisher;
 
@@ -20,10 +20,9 @@ my $plugin; $plugin = new MT::Plugin::Twilog({
     key => 'twilog',
     description => 'Twitlog.comから1日のtweet情報を抽出し、エントリとして自動で公開します。',
     name => 'Twilog',
-    doc_link => 'http://weblibrary.s224.xrea.com/mt4plugins/jsonaccessranking/',
+    doc_link => 'http://weblibrary.s224.xrea.com/mt4plugins/twilog/',
     author_name => 'cool_ni_ikou',
     author_link => 'http://weblibrary.s224.xrea.com/',
-    l10n_class => 'Twitlog::L10N',
     blog_config_template => 'twilog_config.tmpl',
     settings => new MT::PluginSettings([
         ['twitter_username',{ Scope => 'blog' }],
@@ -98,7 +97,7 @@ sub _hdlr_auto_twilog_entry {
 	   $place->category_id($category_id);
 	   $place->is_primary(1);
 	   $place->save
-		or die i'Error saving placement',$place->errstr;
+		or die 'Error saving placement',$place->errstr;
 
 	my $pub = MT::WeblogPublisher->new();
 	   $pub->rebuild_entry( Entry => $entry,
@@ -107,16 +106,16 @@ sub _hdlr_auto_twilog_entry {
 	    		      );
 	   $pub->rebuild_indexes( Blog => $blog );
 
-	my $log = new MT::Log;
-	   $log->message ("$NAME: EntryID-$entry_id: $title published.");
-            $log->blog_id ($blog->id);
-            $log->level (MT::Log::INFO());
-            $log->save;
+	MT->log({
+		message => $NAME.': EntryID-'.$entry_id.':'. $title.' published',
+		blog_id => $blog->id,
+		level => MT::Log::INFO(),
+	});
 }
 
 sub get_data{
 	my ($username, $start, $end ) = @_;
-	my $pattern = qq/"d$end">(.*?)<a name="$start"><\/a>/;
+	my $pattern = qq/"d$end">(.*?)<\/div><a name="$start"><\/a>/;
 	doLog($pattern);
 	my $ua = MT->new_ua({ agent => join("/", $NAME, $VERSION) });
 	my $url = 'http://twilog.org/' . $username;
