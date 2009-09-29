@@ -1,0 +1,44 @@
+<p>
+FriendFeedユーザーネーム、FriendFeed-remotekey（認証パスワード）、FriendFeedグループネーム、ブログID、投稿者ID、カテゴリーID、投稿状態（未公開[1]もしくは公開[2]）、エントリータイトルの設定をしてください。</p>
+<p>FriendFeed-remotekeyについては、<a href='https://friendfeed.com/account/api' title='FriendFeed - リモートキー'>FriendFeed - リモートキー</a>から取得ください。</p>
+<mtapp:setting
+    id="friendfeed_username"
+    label="FriendFeed_Username">
+    <input type="text" name="friendfeed_username" id="friendfeed_username" value="<mt:var name="friendfeed_username" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="friendfeed_remotekey"
+    label="FriendFeed_Remotekey">
+    <input type="password" name="friendfeed_remotekey" id="friendfeed_remotekey" value="<mt:var name="friendfeed_remotekey" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="friendfeed_group"
+    label="FriendFeed_Group">
+    <input type="text" name="friendfeed_group" id="friendfeed_group" value="<mt:var name="friendfeed_group" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="blogid"
+    label="blogid">
+    <input type="text" name="blogid" id="blogid" value="<mt:var name="blogid" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="author_id"
+    label="author_id">
+    <input type="text" name="author_id" id="author_id" value="<mt:var name="author_id" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="category_id"
+    label="categoryID">
+    <input type="text" name="category_id" id="category_id" value="<mt:var name="category_id" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="status"
+    label="公開ステータス">
+    <input type="text" name="status" id="status" value="<mt:var name="status" escape="html">" />
+</mtapp:setting>
+<mtapp:setting
+    id="title"
+    label="エントリータイトル">
+    <input type="text" name="title" id="title" value="<mt:var name="title" escape="html">" />
+</mtapp:setting>
+

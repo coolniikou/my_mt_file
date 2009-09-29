@@ -1,4 +1,4 @@
-package MT::Plugin::Twilog;
+package MT::Plugin::Koneta;
 
 use strict;
 use MT;
@@ -9,24 +9,28 @@ use MT::I18N;
 use MT::Util qw( start_end_day epoch2ts format_ts );
 use MT::Placement;
 use MT::WeblogPublisher;
-
+use JSON;
+use MIME::Base64;
+use Data::Dumper;
 our $VERSION = '0.01';
-our $NAME = 'Twitlog';
+our $NAME = 'Koneta';
 use base qw( MT::Plugin );
 
 
 my $plugin; $plugin = new MT::Plugin::Twilog({
-    id => 'Twilog',
-    key => 'twilog',
-    description => 'Twitlog.comから1日のtweet情報を抽出し、エントリとして自動で公開します。',
-    name => 'Twilog',
-    doc_link => 'http://weblibrary.s224.xrea.com/mt4plugins/twilog/',
+    id => 'Koneta',
+    key => 'koneta',
+    description => 'FriendFeedプライベートフィードから1日のクリップ情報を抽出し、エントリとして自動で公開します。',
+    name => 'Koneta',
+    doc_link => 'http://weblibrary.s224.xrea.com/mt4plugins/koneta/',
     author_name => 'cool_ni_ikou',
     author_link => 'http://weblibrary.s224.xrea.com/',
-    blog_config_template => 'twilog_config.tmpl',
+    blog_config_template => 'koneta_config.tmpl',
     settings => new MT::PluginSettings([
-        ['twitter_username',{ Scope => 'blog' }],
         ['blogid',{ Default => '1' }],
+        ['friendfeed_username',{ Scope => 'blog' }],
+        ['friendfeed_remotekey',{ Scope => 'blog' }],
+        ['friendfeed_group',{ Scope => 'blog' }],
         ['author_id',{ Default => '1', Scope => 'blog' }],
         ['category_id',{ Default => '1', Scope => 'blog' }],
         ['status', { Default => '1', Scope => 'blog' }],
@@ -36,17 +40,29 @@ my $plugin; $plugin = new MT::Plugin::Twilog({
         tasks => {
             $NAME => {
                 name        => $NAME,
-                frequency   => 1, 
-                code        => \&_hdlr_auto_twilog_entry,
+                frequency   => 30, 
+                code        => \&_hdlr_auto_koneta_entry,
             },
         },
     },
 });
 MT->add_plugin( $plugin );
 
-sub _hdlr_auto_twilog_entry {
+sub doLog {
+    my ($msg) = @_; 
+    return unless defined($msg);
+
+    use MT::Log;
+    my $log = MT::Log->new;
+    $log->message($msg) ;
+    $log->save or die $log->errstr;
+}
+
+sub _hdlr_auto_koneta_entry {
 	my $blog_id = $plugin->get_config_value('blogid');
-	my $username = $plugin->get_config_value('twitter_username', 'blog:'.$blog_id);
+	my $username = $plugin->get_config_value('friendfeed_username', 'blog:'.$blog_id);
+	my $password = $plugin->get_config_value('friendfeed_remotekey', 'blog:'.$blog_id);
+	my $group = $plugin->get_config_value('friendfeed_group', 'blog:'.$blog_id);
 	my $author_id = $plugin->get_config_value('author_id', 'blog:'.$blog_id);
 	my $category_id = $plugin->get_config_value('category_id', 'blog:'.$blog_id);
 	my $status = $plugin->get_config_value('status', 'blog:'.$blog_id);
@@ -59,16 +75,40 @@ sub _hdlr_auto_twilog_entry {
 	}
 
 	my $start = start_end_day( epoch2ts( $blog, time - ( 60 * 60 * 24 * 2) ) );
-	   $start = format_ts( '%Y%m%d', $start, $blog );
-	   $start =~ s/\d{2}//;
+	my $ep = epoch2ts( $blog, time - ( 60 * 60 * 24));
+	   $start = format_ts( '%Y-%m-%dT%H:%M:%S', $start, $blog );
 	my $ago = start_end_day( epoch2ts( $blog, time - ( 60 * 60 * 24 ) ) );
 	my $end = format_ts( '%Y%m%d', $ago, $blog );
 	   $end =~ s/\d{2}//;
 	my $date = format_ts( '%Y-%m-%d', $ago, $blog );
 	   $title .= " ".$date;
-	my $body = get_data($username, $start, $end);
-	   $body .= '<p>via <a href="http://twilog.org/" title="Twilog - Twitterのつぶやきをブログ形式で保存">Twilog - Twitterのつぶやきをブログ形式で保存</a></p>';
-
+	my $json = get_data($username, $password, $group);
+	my @loop;
+	foreach my $tex ( @{$json->{entries} } ){
+		my %koneta;
+		my $ts = $tex->{date};
+		   $ts =~ s/(.*?)T.*?Z/$1/;
+		my $com = $tex->{comments}[0]->{body};
+		next unless ( $ts eq $date && defined $com ) ;
+		my $b = $tex->{body};
+		   $b =~ s/(.*?)\s-\s<(.*?)>.*?a>$/<p>via:<$2>$1<\/a><\/p>/o;
+		   $com = '<blockquote>'. $com .'</blockquote>';
+		   $koneta{LINK} = $b;
+		   $koneta{QUOTE} = $com;
+		push (@loop, \%koneta);
+	}
+	my $tmpl = $plugin->load_tmpl('koneta_body.tmpl',{ KONETA => \@loop });
+	my $body = $tmpl->output();
+	   $body = MT::I18N::utf8_off($body);
+	unless ($body){
+		
+		MT->log({
+			message => $NAME.'None Contents, not publish',
+			blog_id => $blog->id,
+			level => MT::Log::INFO(),
+		});
+		die;
+	};
 	my $entry = MT::Entry->new;
 	   $entry->blog_id($blog_id);
 	   $entry->author_id($author_id);
@@ -104,17 +144,15 @@ sub _hdlr_auto_twilog_entry {
 }
 
 sub get_data{
-	my ($username, $start, $end ) = @_;
-	my $pattern = qq/"d$end">(.*?)<\/div><a name="$start"><\/a>/;
+	my ($username, $password, $group ) = @_;
 	my $ua = MT->new_ua({ agent => join("/", $NAME, $VERSION) });
-	my $url = 'http://twilog.org/' . $username;
-	my $res = $ua->get($url);
+	my $url = 'http://friendfeed-api.com/v2/feed/' . $group;
+	my @headers = ( Authorization => "Basic " . MIME::Base64::encode("$username:$password", ""));
+	my $res = $ua->get($url, @headers);
 	if ($res->is_success) {
 		my $html = $res->content;
-		$html =~ s/\n//g;
-		if ( $html =~ /$pattern/g ){
-			return $1;
-		}
+		my $json = decode_json($html);
+		return $json;
 	} else {
 		MT->log({
 			message => '情報を取得することができません。プラグイン設定画面にて、各種設定を確認してください。'. $res->status_line,
