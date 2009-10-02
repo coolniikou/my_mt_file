@@ -17,7 +17,7 @@ our $NAME = 'Koneta';
 use base qw( MT::Plugin );
 
 
-my $plugin; $plugin = new MT::Plugin::Twilog({
+my $plugin; $plugin = new MT::Plugin::Koneta({
     id => 'Koneta',
     key => 'koneta',
     description => 'FriendFeedプライベートフィードから1日のクリップ情報を抽出し、エントリとして自動で公開します。',
@@ -40,23 +40,13 @@ my $plugin; $plugin = new MT::Plugin::Twilog({
         tasks => {
             $NAME => {
                 name        => $NAME,
-                frequency   => 30, 
+                frequency   => 240, 
                 code        => \&_hdlr_auto_koneta_entry,
             },
         },
     },
 });
 MT->add_plugin( $plugin );
-
-sub doLog {
-    my ($msg) = @_; 
-    return unless defined($msg);
-
-    use MT::Log;
-    my $log = MT::Log->new;
-    $log->message($msg) ;
-    $log->save or die $log->errstr;
-}
 
 sub _hdlr_auto_koneta_entry {
 	my $blog_id = $plugin->get_config_value('blogid');
@@ -74,12 +64,7 @@ sub _hdlr_auto_koneta_entry {
 		$blog = MT::Blog->load( undef, { limit => 1 } );
 	}
 
-	my $start = start_end_day( epoch2ts( $blog, time - ( 60 * 60 * 24 * 2) ) );
-	my $ep = epoch2ts( $blog, time - ( 60 * 60 * 24));
-	   $start = format_ts( '%Y-%m-%dT%H:%M:%S', $start, $blog );
 	my $ago = start_end_day( epoch2ts( $blog, time - ( 60 * 60 * 24 ) ) );
-	my $end = format_ts( '%Y%m%d', $ago, $blog );
-	   $end =~ s/\d{2}//;
 	my $date = format_ts( '%Y-%m-%d', $ago, $blog );
 	   $title .= " ".$date;
 	my $json = get_data($username, $password, $group);
@@ -89,10 +74,9 @@ sub _hdlr_auto_koneta_entry {
 		my $ts = $tex->{date};
 		   $ts =~ s/(.*?)T.*?Z/$1/;
 		my $com = $tex->{comments}[0]->{body};
-		next unless ( $ts eq $date && defined $com ) ;
+		next unless ( defined $com ) ;
 		my $b = $tex->{body};
-		   $b =~ s/(.*?)\s-\s<(.*?)>.*?a>$/<p>via:<$2>$1<\/a><\/p>/o;
-		   $com = '<blockquote>'. $com .'</blockquote>';
+		   $b =~ s/(.*?)\s-\s\<((?:(?!>).)*)>.*?>/<$2>$1<\/a>/o;
 		   $koneta{LINK} = $b;
 		   $koneta{QUOTE} = $com;
 		push (@loop, \%koneta);
@@ -107,7 +91,7 @@ sub _hdlr_auto_koneta_entry {
 			blog_id => $blog->id,
 			level => MT::Log::INFO(),
 		});
-		die;
+		die'None Contents: $!';
 	};
 	my $entry = MT::Entry->new;
 	   $entry->blog_id($blog_id);
