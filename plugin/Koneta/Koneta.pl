@@ -74,9 +74,9 @@ sub _hdlr_auto_koneta_entry {
 		my $ts = $tex->{date};
 		   $ts =~ s/(.*?)T.*?Z/$1/;
 		my $com = $tex->{comments}[0]->{body};
-		next unless ( $ts eq $date && defined $com ) ;
+		next unless ( defined $com );#$ts eq $date && defined $com ) ;
 		my $b = $tex->{body};
-		   $b =~ s/(.*?)\s-\s\<((?:(?!>).)*)>.*?>/<$2>$1<\/a>/o;
+		   $b =~ s/(.*?)(?:\s<(?:(?!<>).*)>|)\s-\s\<(.*?)>.*?>/<$2>$1<\/a>/g;
 		   $koneta{LINK} = $b;
 		   $koneta{QUOTE} = $com;
 		push (@loop, \%koneta);
