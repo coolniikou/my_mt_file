@@ -69,6 +69,16 @@ sub _hdlr_auto_twilog_entry {
 	my $body = get_data($username, $start, $end);
 	   $body .= '<p>via <a href="http://twilog.org/" title="Twilog - Twitterのつぶやきをブログ形式で保存">Twilog - Twitterのつぶやきをブログ形式で保存</a></p>';
 
+	my @entries = overlap($blog_id, $category_id, $status, $title);
+	if (@entries){
+	 	MT->log({
+			message => $NAME.':overlapped, not publish',
+			blog_id => $blog->id,
+			level => MT::Log::INFO(),
+		});
+		die 'overlapped, not publish: $!';
+	}
+
 	my $entry = MT::Entry->new;
 	   $entry->blog_id($blog_id);
 	   $entry->author_id($author_id);
@@ -123,6 +133,21 @@ sub get_data{
 		});
 		die '情報を取得することができません。プラグイン設定画面にて、各種設定を確認してください。'. $res->status_line;
 	}
+}
+
+sub overlap{
+	my ($blog_id, $category_id, $status, $title) = @_;
+	my @entries = MT::Entry->load({ 
+				blog_id => $blog_id,
+				status => $status,
+				title => { like => $title },
+				}, {
+				join => [ 'MT::Placement', 'entry_id',
+					{ category_id => $category_id },
+					{ unique => 1 }
+					],
+				});
+	return @entries;
 }
 1;
 __END__
