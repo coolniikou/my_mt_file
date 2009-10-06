@@ -3,8 +3,14 @@
    <TMPL_LOOP NAME="KONETA">
 	<div class="koneta_item">
 	<p>via :<TMPL_VAR NAME="LINK"></p>   
-        <blockquote><TMPL_VAR NAME="QUOTE"></blockquote>
-        <p><TMPL_VAR NAME="COMM"></p>
+	<TMPL_IF NAME="PIC">
+   		<TMPL_LOOP NAME="PIC">	
+        	<img src= '<TMPL_VAR NAME="URL">' width='<TMPL_VAR NAME="WIDTH">' height='<TMPL_VAR NAME="HEIGHT">'/></p>
+		</TMPL_LOOP>
+	</TMPL_IF>
+   	<TMPL_LOOP NAME="QUOTE">
+   		<blockquote><TMPL_VAR NAME="BODY"></blockquote>
+	</TMPL_LOOP>
 	<div class="hatena_relate"></div>
 	</div>
    </TMPL_LOOP>

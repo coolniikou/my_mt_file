@@ -40,7 +40,7 @@ my $plugin; $plugin = new MT::Plugin::Koneta({
         tasks => {
             $NAME => {
                 name        => $NAME,
-                frequency   => 240, 
+                frequency   => 1, 
                 code        => \&_hdlr_auto_koneta_entry,
             },
         },
@@ -66,33 +66,29 @@ sub _hdlr_auto_koneta_entry {
 
 	my $ago = start_end_day( epoch2ts( $blog, time - ( 60 * 60 * 24 ) ) );
 	my $date = format_ts( '%Y-%m-%d', $ago, $blog );
-	   $title .= " ".$date;
 	my $json = get_data($username, $password, $group);
-	my @loop;
-	foreach my $tex ( @{$json->{entries} } ){
-		my %koneta;
-		my $ts = $tex->{date};
-		   $ts =~ s/(.*?)T.*?Z/$1/;
-		my $com = $tex->{comments}[0]->{body};
-		next unless ( $ts eq $date && defined $com );#$ts eq $date && defined $com ) ;
-		my $b = $tex->{body};
-		   $b =~ s/(.*?)(?:\s<(?:(?!<>).*)>|)\s-\s\<(.*?)>.*?>/<$2>$1<\/a>/g;
-		   $koneta{LINK} = $b;
-		   $koneta{QUOTE} = $com;
-		push (@loop, \%koneta);
-	}
-	my $tmpl = $plugin->load_tmpl('koneta_body.tmpl',{ KONETA => \@loop });
-	my $body = $tmpl->output();
-	   $body = MT::I18N::utf8_off($body);
+	my $body = body_out($json, $date);
+	   $title .= " ".$date;
+
 	unless ($body){
-		
 		MT->log({
-			message => $NAME.'None Contents, not publish',
+			message => $NAME.':None Contents, not publish',
 			blog_id => $blog->id,
 			level => MT::Log::INFO(),
 		});
 		die'None Contents: $!';
 	};
+
+	my @entries = overlap($blog_id, $category_id, $status, $title);
+	if (@entries){
+	 	MT->log({
+			message => $NAME.':overlapped, not publish',
+			blog_id => $blog->id,
+			level => MT::Log::INFO(),
+		});
+		die 'overlapped, not publish: $!';
+	}
+
 	my $entry = MT::Entry->new;
 	   $entry->blog_id($blog_id);
 	   $entry->author_id($author_id);
@@ -104,6 +100,7 @@ sub _hdlr_auto_koneta_entry {
 	   $entry->text($body);
 	   $entry->save
 		or die 'Error saving entry', $entry->errstr;
+
 	my $entry_id = $entry->id;
 	my $place = MT::Placement->new;
 	   $place->entry_id($entry_id);
@@ -125,6 +122,7 @@ sub _hdlr_auto_koneta_entry {
 		blog_id => $blog->id,
 		level => MT::Log::INFO(),
 	});
+	
 }
 
 sub get_data{
@@ -145,6 +143,63 @@ sub get_data{
 		});
 		die '情報を取得することができません。プラグイン設定画面にて、各種設定を確認してください。'. $res->status_line;
 	}
+}
+
+sub body_out{
+	my ($json, $date) = @_;
+
+	my @loop;
+	foreach my $item ( @{$json->{entries} } ){
+		my %koneta;
+		my $ts = $item->{date};
+		   $ts =~ s/(.*?)T.*?Z/$1/;
+		next unless ( $ts eq $date && defined ($item->{comments}) );#$ts eq $date && defined $com ) ;
+		my $b = $item->{body};
+		   $b =~ s/(.*?)(?:\s<(?:(?:(?!<>).)*)>|)\s-\s\<(.*?)>.*?>/<$2>$1<\/a>/g;
+		if ( $item->{thumbnails} ){
+			my @image;
+			foreach my $p ( @{ $item->{thumbnails} } ){
+				my %picture;
+				   $picture{URL} = $p->{url};
+				   $picture{WIDTH} = $p->{width};
+				   $picture{HEIGHT} = $p->{height};
+				push (@image, \%picture);
+			}
+			$koneta{PIC} = \@image;
+		}
+
+		if ( $item->{comments} ){
+			my @quote;
+			foreach my $c ( @{ $item->{comments} } ){
+				my %comments;
+				   $comments{BODY} = $c->{body};
+				push (@quote, \%comments);
+			}
+			$koneta{QUOTE} = \@quote;
+		}
+	
+		   $koneta{LINK} = $b;
+		push (@loop, \%koneta);
+	}
+	my $tmpl = $plugin->load_tmpl('koneta_body.tmpl',{ KONETA => \@loop });
+	my $body = $tmpl->output();
+	   $body = MT::I18N::utf8_off($body);
+	return $body;
+}
+
+sub overlap{
+	my ($blog_id, $category_id, $status, $title) = @_;
+	my @entries = MT::Entry->load({ 
+				blog_id => $blog_id,
+				status => $status,
+				title => { like => $title },
+				}, {
+				join => [ 'MT::Placement', 'entry_id',
+					{ category_id => $category_id },
+					{ unique => 1 }
+                                        ],
+                              });
+	return @entries;
 }
 1;
 __END__
