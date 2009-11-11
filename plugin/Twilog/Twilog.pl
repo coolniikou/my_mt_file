@@ -26,7 +26,7 @@ my $plugin; $plugin = new MT::Plugin::Twilog({
     blog_config_template => 'twilog_config.tmpl',
     settings => new MT::PluginSettings([
         ['twitter_username',{ Scope => 'blog' }],
-        ['blogid',{ Default => '1' }],
+        ['blogid',{ Default => '1', Scope => 'blog' }],
         ['author_id',{ Default => '1', Scope => 'blog' }],
         ['category_id',{ Default => '1', Scope => 'blog' }],
         ['status', { Default => '1', Scope => 'blog' }],
