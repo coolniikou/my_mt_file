@@ -112,7 +112,7 @@ sub _twilog_entry {
 	   $pub->rebuild_indexes( Blog => $blog );
 
 	MT->log({
-		message => $NAME.': EntryID-'.$entry_id.':'. $title.' published',
+		message => $MYNAME.': EntryID-'.$entry_id.':'. $title.' published',
 		blog_id => $blog->id,
 		level => MT::Log::INFO(),
 	});

@@ -1,6 +1,7 @@
 <p>
 Tiwtterユーザーネーム、ブログID、投稿者ID、カテゴリーID、投稿状態（未公開[1]もしくは公開[2]）、エントリータイトルの設定をしてください。
 </p>
+<ul>
 <mtapp:setting
     id="twitter_username"
     label="Twitter_Username">
@@ -31,4 +32,5 @@ Tiwtterユーザーネーム、ブログID、投稿者ID、カテゴリーID、�
     label="エントリータイトル">
     <input type="text" name="title" id="title" value="<mt:var name="title" escape="html">" />
 </mtapp:setting>
+</ul>
 
