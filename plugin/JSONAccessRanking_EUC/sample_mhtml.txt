@@ -1,0 +1,22 @@
+sample_mhtml (index template)
+--name			 --file_name			--mhtml
+accessranking_day_ago	 accessranking_day_ago.json	<mt:JSONAccessRanking span='1'>	
+accessranking_month	 accessranking_month.json	<mt:JSONAccessRanking span='30'>
+accessranking_week	 accessranking_week.json 	<mt:JSONAccessRanking span='7'>
+
+sample_HTML ( widget )
+<div class="widget-ranking-entries widget-archives widget">
+    <h3 class="widget-header">人気アクセスランキング</h3>
+    <div class="ranking">
+        <ul class="rktab">
+                <li><a href="#day_ago"><em>day_ago</em></a></ll>
+                <li><a href="#week"><em>week</em></a></li>
+                <li><a href="#month"><em>month</em></a></ll>
+        </ul>
+        <div class="widget-content accessranking">
+        </div>
+    </div>
+</div>
+<div class="widget">
+<iframe src="http://rcm-jp.amazon.co.jp/e/cm?t=coolniikou-22&o=9&p=21&l=ur1&category=amazoncampaign&banner=1Z6965BBD85D79FXJQR2&f=ifr" width="125" height="125" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>
+</div>
