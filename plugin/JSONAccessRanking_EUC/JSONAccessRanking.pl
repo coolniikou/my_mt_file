@@ -62,7 +62,9 @@ sub _hdlr_analyticjson {
 	my $parser = XML::Simple->new(Forcearray => 1);
 	my $xml = $parser->XMLin($data);
 	my $json = to_json($xml->{entry});
-	return $json;
+	my $enc = MT::I18N::guess_encoding($json);
+	my $enc_json = MT::I18N::encode_text($json, $enc, 'euc-jp');
+	return $enc_json;
 }
 
 sub get_token{
