@@ -3,6 +3,7 @@ use strict;
 use base qw(MT::Plugin);
 use MT;
 use MT::Util qw( start_end_day epoch2ts format_ts );
+use MT::I18N;
 use XML::Simple;
 use JSON;
 
