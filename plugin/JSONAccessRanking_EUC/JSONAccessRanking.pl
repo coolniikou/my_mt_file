@@ -64,7 +64,7 @@ sub _hdlr_analyticjson {
 	my $xml = $parser->XMLin($data);
 	my $json = to_json($xml->{entry});
 	my $enc = MT::I18N::guess_encoding($json);
-	my $enc_json = MT::I18N::encode_text($json, $enc, 'euc-jp');
+	my $enc_json = MT::I18N::encode_text($json, $enc, 'utf-8');
 	return $enc_json;
 }
 
