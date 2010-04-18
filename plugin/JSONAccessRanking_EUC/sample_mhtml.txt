@@ -17,6 +17,3 @@ sample_HTML ( widget )
         </div>
     </div>
 </div>
-<div class="widget">
-<iframe src="http://rcm-jp.amazon.co.jp/e/cm?t=coolniikou-22&o=9&p=21&l=ur1&category=amazoncampaign&banner=1Z6965BBD85D79FXJQR2&f=ifr" width="125" height="125" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>
-</div>
