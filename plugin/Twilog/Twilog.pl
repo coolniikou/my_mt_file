@@ -6,12 +6,13 @@ use MT::Blog;
 use MT::Entry;
 use MT::Log;
 use MT::I18N;
-use MT::Util qw( start_end_day epoch2ts format_ts encode_xml);
+use MT::Util qw( start_end_day epoch2ts format_ts );
 use MT::Placement;
 use MT::WeblogPublisher;
 use Encode;
+use Data::Dumper;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 our $NAME = 'Twitlog';
 use base qw( MT::Plugin );
 
@@ -28,11 +29,12 @@ my $plugin; $plugin = new MT::Plugin::Twilog({
     blog_config_template => 'twilog_config.tmpl',
     settings => new MT::PluginSettings([
         ['twitter_username',{ Scope => 'blog' }],
-        ['blogid',{ Default => '1' }],
+        ['blogid',{ Default => '1', Scope => 'blog' }],
         ['author_id',{ Default => '1', Scope => 'blog' }],
         ['category_id',{ Default => '1', Scope => 'blog' }],
         ['status', { Default => '1', Scope => 'blog' }],
         ['title', { Default => 'today tweet', Scope => 'blog' }],
+        ['display',{ Default => 0, Scope => 'blog' }],
     ]),
     registry => {
         tasks => {
@@ -73,6 +75,7 @@ sub _twilog_entry {
 	my $category_id = $plugin->get_config_value('category_id', 'blog:'.$blog_id);
 	my $status = $plugin->get_config_value('status', 'blog:'.$blog_id);
 	my $title = $plugin->get_config_value('title', 'blog:'.$blog_id);
+	my $display = $plugin->get_config_value('display', 'blog:'.$blog_id);
 	my $start = start_end_day( epoch2ts( $blog, time - ( 60 * 60 * 24 * 2) ) );
 	   $start = format_ts( '%Y%m%d', $start, $blog );
 	   $start =~ s/\d{2}//;
@@ -81,8 +84,8 @@ sub _twilog_entry {
 	   $end =~ s/\d{2}//;
 	my $date = format_ts( '%Y-%m-%d', $ago, $blog );
 	   $title .= " ".$date;
-	my $body = get_data($username, $start, $end);
-	   $body .= '<p>via <a href="http://twilog.org/" title="Twilog - Twitterのつぶやきをブログ形式で保存">Twilog - Twitterのつぶやきをブログ形式で保存</a></p>';
+	my $body = get_data($username, $display, $start, $end);
+	   $body .= MT::I18N::utf8_off('<p>via <a href="http://twilog.org/" title="Twilog - Twitterのつぶやきをブログ形式で保存">Twilog - Twitterのつぶやきをブログ形式で保存</a></p>');
 
 	my $entry = MT::Entry->new;
 	   $entry->blog_id($blog_id);
@@ -119,12 +122,15 @@ sub _twilog_entry {
 }
 
 sub get_data{
-	my ($username, $start, $end ) = @_;
+	my ($username, $display, $start, $end ) = @_;
 	my $pattern = qq/"d$end">(.*?)<\/div><a name="$start"><\/a>/;
 	require MT::I18N;
 	my $charset = MT::ConfigMgr->instance->PublishCharset;
 	my $ua = MT->new_ua({ agent => join("/", $NAME, $VERSION) });
-	my $url = 'http://twilog.org/' . $username;
+	my $url =
+	   ( $display == '1' ) ? 'http://twilog.org/' . $username . '/norep' :
+	   ( $display == '2' ) ? 'http://twilog.org/' . $username . '/nomen' :
+	                         'http://twilog.org/' . $username ;
 	my $res = $ua->get($url);
 	if ($res->is_success) {
 		my $html = $res->content;

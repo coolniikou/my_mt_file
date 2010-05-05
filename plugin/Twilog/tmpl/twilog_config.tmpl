@@ -31,4 +31,13 @@ Tiwtterユーザーネーム、ブログID、投稿者ID、カテゴリーID、�
     label="エントリータイトル">
     <input type="text" name="title" id="title" value="<mt:var name="title" escape="html">" />
 </mtapp:setting>
-
+<ul>
+<mtapp:setting
+	id="display"
+	label="表示内容">
+<li><input type="radio" name="display" id="display" value="0" <TMPL_UNLESS NAME=DISPLAY>checked="checked"</TMPL_UNLESS> />すべて</li>
+<li><input type="radio" name="display" id="display" value="1" <TMPL_IF NAME=DISPLAY_1>checked="checked"</TMPL_IF> />Replayを除く</li>
+<li><input type="radio" name="display" id="display" value="2" <TMPL_IF NAME=DISPLAY_2>checked="checked"</TMPL_IF> />Mentionを除く</li>
+</mtapp:setting>
+</ul>
+<ul>
