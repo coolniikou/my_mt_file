@@ -84,7 +84,8 @@ sub _twilog_entry {
 	   $end =~ s/\d{2}//;
 	my $date = format_ts( '%Y-%m-%d', $ago, $blog );
 	   $title .= " ".$date;
-	my $body = get_data($username, $display, $start, $end);
+	my $body = MT::I18N::utf8_off('<div class="tl-tweets" id="d'. $end .'">'); 
+	   $body .= get_data($username, $display, $start, $end);
 	   $body .= MT::I18N::utf8_off('<p>via <a href="http://twilog.org/" title="Twilog - Twitterのつぶやきをブログ形式で保存">Twilog - Twitterのつぶやきをブログ形式で保存</a></p>');
 
 	my $entry = MT::Entry->new;
@@ -123,14 +124,14 @@ sub _twilog_entry {
 
 sub get_data{
 	my ($username, $display, $start, $end ) = @_;
-	my $pattern = qq/"d$end">(.*?)<\/div><a name="$start"><\/a>/;
+	my $pattern = qq/"d$end">(.*?)<a name="$start"><\/a>/;
 	require MT::I18N;
 	my $charset = MT::ConfigMgr->instance->PublishCharset;
 	my $ua = MT->new_ua({ agent => join("/", $NAME, $VERSION) });
 	my $url =
 	   ( $display == '1' ) ? 'http://twilog.org/' . $username . '/norep' :
 	   ( $display == '2' ) ? 'http://twilog.org/' . $username . '/nomen' :
-	                         'http://twilog.org/' . $username ;
+	                       'http://twilog.org/' . $username ;
 	my $res = $ua->get($url);
 	if ($res->is_success) {
 		my $html = $res->content;
